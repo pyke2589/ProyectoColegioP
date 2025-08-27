@@ -4,9 +4,10 @@ const { conexion } = require('./config/conexion');
 
 router.get('/aulas', (req, res) => {
     let sql = 'SELECT * FROM TAulas';
-    conexion.query(sql, (err, result) => {
+    req.conexion.query(sql, (err, result) => {
         if (err) {
             console.log('Error en la consulta', err);
+            res.status(500).json({ mensaje: 'Error al consultar' });
         } else {
             res.send(result);
         }
@@ -15,7 +16,7 @@ router.get('/aulas', (req, res) => {
 
 router.post('/aulas', (req, res) => {
     let sqlMax = 'SELECT IFNULL(MAX(id_aula), 0) AS maxId FROM TAulas';
-    conexion.query(sqlMax, (err, result) => {
+    req.conexion.query(sqlMax, (err, result) => {
         if (err) {
             console.log('Error al obtener último id_aula', err);
             return res.status(500).json({ mensaje: 'Error al generar ID' });
@@ -30,7 +31,7 @@ router.post('/aulas', (req, res) => {
             capacidad: req.body.capacidad
         };
         let sqlInsert = 'INSERT INTO TAulas SET ?';
-        conexion.query(sqlInsert, data, (err, resul) => {
+        req.conexion.query(sqlInsert, data, (err, resul) => {
             if (err) {
                 console.log('Error en el insert', err);
                 res.status(500).json({ mensaje: 'Error al insertar' });
@@ -50,9 +51,10 @@ router.put('/aulas/:id', (req, res) => {
         capacidad: req.body.capacidad
     };
     let sql = 'UPDATE TAulas SET ? WHERE id_aula = ?';
-    conexion.query(sql, [data, id], (err, result) => {
+    req.conexion.query(sql, [data, id], (err, result) => {
         if (err) {
             console.log('Error en el update', err);
+            res.status(500).json({ mensaje: 'Error al actualizar' });
         } else {
             res.json({ mensaje: 'Aula actualizada correctamente' });
         }
@@ -62,12 +64,35 @@ router.put('/aulas/:id', (req, res) => {
 router.delete('/aulas/:id', (req, res) => {
     let id = req.params.id;
     let sql = 'DELETE FROM TAulas WHERE id_aula = ?';
-    conexion.query(sql, [id], (err, result) => {
+    req.conexion.query(sql, [id], (err, result) => {
         if (err) {
             console.log('Error al eliminar aula', err);
             res.status(500).json({ mensaje: 'Error al eliminar' });
         } else {
             res.json({ mensaje: 'Aula eliminada correctamente' });
+        }
+    });
+});
+
+router.get('/aulas/:id', (req, res) => {
+    let id = req.params.id;
+    let sql = `
+        SELECT 
+            a.id_aula,
+            a.nombre AS NombreAula,
+            a.ubicacion AS Ubicacion,
+            a.tipo_aula AS TipoAula,
+            a.capacidad AS Capacidad
+        FROM 
+            TAulas a
+        WHERE a.id_aula = ?
+    `;
+    req.conexion.query(sql, [id], (err, result) => {
+        if (err) {
+            res.json({ mensaje: 'error' });
+            console.log('Error en la consulta', err);
+        } else {
+            res.send(result.length > 0 ? result[0] : { mensaje: 'No encontrado' });
         }
     });
 });

@@ -4,9 +4,10 @@ const { conexion } = require('./config/conexion');
 
 router.get('/asistencias', (req, res) => {
     let sql = 'SELECT * FROM TAsistencias';
-    conexion.query(sql, (err, result) => {
+    req.conexion.query(sql, (err, result) => {
         if (err) {
             console.log('Error en la consulta', err);
+            res.status(500).json({ mensaje: 'Error al consultar' });
         } else {
             res.send(result);
         }
@@ -15,7 +16,7 @@ router.get('/asistencias', (req, res) => {
 
 router.post('/asistencias', (req, res) => {
     let sqlMax = 'SELECT IFNULL(MAX(id_asistencia), 0) AS maxId FROM TAsistencias';
-    conexion.query(sqlMax, (err, result) => {
+    req.conexion.query(sqlMax, (err, result) => {
         if (err) {
             console.log('Error al obtener último id_asistencia', err);
             return res.status(500).json({ mensaje: 'Error al generar ID' });
@@ -31,7 +32,7 @@ router.post('/asistencias', (req, res) => {
             observacion: req.body.observacion || null
         };
         let sqlInsert = 'INSERT INTO TAsistencias SET ?';
-        conexion.query(sqlInsert, data, (err, resul) => {
+        req.conexion.query(sqlInsert, data, (err, resul) => {
             if (err) {
                 console.log('Error en el insert', err);
                 res.status(500).json({ mensaje: 'Error al insertar' });
@@ -52,9 +53,10 @@ router.put('/asistencias/:id', (req, res) => {
         observacion: req.body.observacion || null
     };
     let sql = 'UPDATE TAsistencias SET ? WHERE id_asistencia = ?';
-    conexion.query(sql, [data, id], (err, result) => {
+    req.conexion.query(sql, [data, id], (err, result) => {
         if (err) {
             console.log('Error en el update', err);
+            res.status(500).json({ mensaje: 'Error al actualizar' });
         } else {
             res.json({ mensaje: 'Asistencia actualizada correctamente' });
         }
@@ -64,12 +66,39 @@ router.put('/asistencias/:id', (req, res) => {
 router.delete('/asistencias/:id', (req, res) => {
     let id = req.params.id;
     let sql = 'DELETE FROM TAsistencias WHERE id_asistencia = ?';
-    conexion.query(sql, [id], (err, result) => {
+    req.conexion.query(sql, [id], (err, result) => {
         if (err) {
             console.log('Error al eliminar asistencia', err);
             res.status(500).json({ mensaje: 'Error al eliminar' });
         } else {
             res.json({ mensaje: 'Asistencia eliminada correctamente' });
+        }
+    });
+});
+
+router.get('/asistencias/:id', (req, res) => {
+    let id = req.params.id;
+    let sql = `
+        SELECT 
+            a.id_asistencia,
+            a.fecha_asistencia AS FechaAsistencia,
+            a.tipo AS TipoAsistencia,
+            COALESCE(a.observacion, '') AS Observacion,
+            CONCAT(p.nombre, ' ', p.apellido1, COALESCE(' ' + p.apellido2, '')) AS NombreEstudiante,
+            p.ci AS CarnetEstudiante,
+            asg.nombre AS NombreAsignatura
+        FROM 
+            TAsistencias a
+            INNER JOIN TPersonal p ON a.id_persona_estudiante = p.id_persona
+            INNER JOIN TAsignaturas asg ON a.id_asignatura = asg.id_asignatura
+        WHERE a.id_asistencia = ?
+    `;
+    req.conexion.query(sql, [id], (err, result) => {
+        if (err) {
+            res.json({ mensaje: 'error' });
+            console.log('Error en la consulta', err);
+        } else {
+            res.send(result.length > 0 ? result[0] : { mensaje: 'No encontrado' });
         }
     });
 });

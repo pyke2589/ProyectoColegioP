@@ -4,9 +4,10 @@ const { conexion } = require('./config/conexion');
 
 router.get('/personal', (req, res) => {
     let sql = 'SELECT * FROM TPersonal';
-    conexion.query(sql, (err, result) => {
+    req.conexion.query(sql, (err, result) => {
         if (err) {
             console.log('Error en la consulta', err);
+            res.status(500).json({ mensaje: 'Error al consultar' });
         } else {
             res.send(result);
         }
@@ -15,7 +16,7 @@ router.get('/personal', (req, res) => {
 
 router.post('/personal', (req, res) => {
     let sqlMax = 'SELECT IFNULL(MAX(id_persona), 0) AS maxId FROM TPersonal';
-    conexion.query(sqlMax, (err, result) => {
+    req.conexion.query(sqlMax, (err, result) => {
         if (err) {
             console.log('Error al obtener último id_persona', err);
             return res.status(500).json({ mensaje: 'Error al generar ID' });
@@ -37,7 +38,7 @@ router.post('/personal', (req, res) => {
             genero: req.body.genero || null
         };
         let sqlInsert = 'INSERT INTO TPersonal SET ?';
-        conexion.query(sqlInsert, data, (err, resul) => {
+        req.conexion.query(sqlInsert, data, (err, resul) => {
             if (err) {
                 console.log('Error en el insert', err);
                 res.status(500).json({ mensaje: 'Error al insertar' });
@@ -64,9 +65,10 @@ router.put('/personal/:id', (req, res) => {
         genero: req.body.genero || null
     };
     let sql = 'UPDATE TPersonal SET ? WHERE id_persona = ?';
-    conexion.query(sql, [data, id], (err, result) => {
+    req.conexion.query(sql, [data, id], (err, result) => {
         if (err) {
             console.log('Error en el update', err);
+            res.status(500).json({ mensaje: 'Error al actualizar' });
         } else {
             res.json({ mensaje: 'Persona actualizada correctamente' });
         }
@@ -76,12 +78,45 @@ router.put('/personal/:id', (req, res) => {
 router.delete('/personal/:id', (req, res) => {
     let id = req.params.id;
     let sql = 'DELETE FROM TPersonal WHERE id_persona = ?';
-    conexion.query(sql, [id], (err, result) => {
+    req.conexion.query(sql, [id], (err, result) => {
         if (err) {
             console.log('Error al eliminar persona', err);
             res.status(500).json({ mensaje: 'Error al eliminar' });
         } else {
             res.json({ mensaje: 'Persona eliminada correctamente' });
+        }
+    });
+});
+
+router.get('/personal/:id', (req, res) => {
+    let id = req.params.id;
+    let sql = `
+        SELECT 
+            p.id_persona,
+            p.nombre AS NombrePersona,
+            p.apellido1 AS PrimerApellido,
+            COALESCE(p.apellido2, '') AS SegundoApellido,
+            p.tipo_persona AS TipoPersona,
+            c.nombre AS Cargo,
+            c.sueldo_base AS SueldoBase,
+            p.ci AS CarnetIdentidad,
+            p.turno AS Turno,
+            p.correo AS Correo,
+            p.contacto AS Contacto,
+            p.genero AS Genero,
+            p.fecha_a AS FechaAlta,
+            CASE p.estado_a WHEN 1 THEN 'Activo' ELSE 'Inactivo' END AS Estado
+        FROM 
+            TPersonal p
+            LEFT JOIN TCargo c ON p.id_cargo = c.id_cargo
+        WHERE p.id_persona = ?
+    `;
+    req.conexion.query(sql, [id], (err, result) => {
+        if (err) {
+            res.json({ mensaje: 'error' });
+            console.log('Error en la consulta', err);
+        } else {
+            res.send(result.length > 0 ? result[0] : { mensaje: 'No encontrado' });
         }
     });
 });
