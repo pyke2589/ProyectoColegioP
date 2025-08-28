@@ -15,8 +15,12 @@ conexion.connect((err) => {
     if (err) {
         throw err;
     } else {
-        console.log('Conexión exitosa a la base de datos ColegioPublico');
+        console.log('Conexión exitosa a la base de datos colegiopublico');
     }
+});
+
+app.listen(puerto, () => {
+    console.log('Servidor levantado en el puerto', puerto);
 });
 
 module.exports = { app, conexion, puerto };

@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { conexion } = require('./config/conexion');
 
-router.get('/cargo', (req, res) => {
-    let sql = 'SELECT * FROM TCargo';
+router.get('/relacion-apoderados', (req, res) => {
+    let sql = 'SELECT * FROM TRelacion_Apoderados';
     req.conexion.query(sql, (err, result) => {
         if (err) {
             console.log('Error en la consulta', err);
@@ -14,72 +14,69 @@ router.get('/cargo', (req, res) => {
     });
 });
 
-router.post('/cargo', (req, res) => {
-    let sqlMax = 'SELECT IFNULL(MAX(id_cargo), 0) AS maxId FROM TCargo';
+router.post('/relacion-apoderados', (req, res) => {
+    let sqlMax = 'SELECT IFNULL(MAX(id_relacion), 0) AS maxId FROM TRelacion_Apoderados';
     req.conexion.query(sqlMax, (err, result) => {
         if (err) {
-            console.log('Error al obtener último id_cargo', err);
+            console.log('Error al obtener último id_relacion', err);
             return res.status(500).json({ mensaje: 'Error al generar ID' });
         }
 
         let nuevoId = result[0].maxId + 1;
         let data = {
-            id_cargo: nuevoId,
-            nombre: req.body.nombre,
-            sueldo_base: req.body.sueldo_base
+            id_relacion: nuevoId,
+            nombre: req.body.nombre
         };
-        let sqlInsert = 'INSERT INTO TCargo SET ?';
+        let sqlInsert = 'INSERT INTO TRelacion_Apoderados SET ?';
         req.conexion.query(sqlInsert, data, (err, resul) => {
             if (err) {
                 console.log('Error en el insert', err);
                 res.status(500).json({ mensaje: 'Error al insertar' });
             } else {
-                res.json({ mensaje: 'Cargo creado', id_generado: nuevoId, data: data });
+                res.json({ mensaje: 'Relación creada', id_generado: nuevoId, data: data });
             }
         });
     });
 });
 
-router.put('/cargo/:id', (req, res) => {
+router.put('/relacion-apoderados/:id', (req, res) => {
     let id = req.params.id;
     let data = {
-        nombre: req.body.nombre,
-        sueldo_base: req.body.sueldo_base
+        nombre: req.body.nombre
     };
-    let sql = 'UPDATE TCargo SET ? WHERE id_cargo = ?';
+    let sql = 'UPDATE TRelacion_Apoderados SET ? WHERE id_relacion = ?';
     req.conexion.query(sql, [data, id], (err, result) => {
         if (err) {
             console.log('Error en el update', err);
             res.status(500).json({ mensaje: 'Error al actualizar' });
         } else {
-            res.json({ mensaje: 'Cargo actualizado correctamente' });
+            res.json({ mensaje: 'Relación actualizada correctamente' });
         }
     });
 });
 
-router.delete('/cargo/:id', (req, res) => {
+router.delete('/relacion-apoderados/:id', (req, res) => {
     let id = req.params.id;
-    let sql = 'DELETE FROM TCargo WHERE id_cargo = ?';
+    let sql = 'DELETE FROM TRelacion_Apoderados WHERE id_relacion = ?';
     req.conexion.query(sql, [id], (err, result) => {
         if (err) {
-            console.log('Error al eliminar cargo', err);
+            console.log('Error al eliminar relación', err);
             res.status(500).json({ mensaje: 'Error al eliminar' });
         } else {
-            res.json({ mensaje: 'Cargo eliminado correctamente' });
+            res.json({ mensaje: 'Relación eliminada correctamente' });
         }
     });
 });
 
-router.get('/cargo/:id', (req, res) => {
+router.get('/relacion-apoderados/:id', (req, res) => {
     let id = req.params.id;
     let sql = `
         SELECT 
-            c.id_cargo,
-            c.nombre AS NombreCargo,
-            c.sueldo_base AS SueldoBase
+            r.id_relacion,
+            r.nombre AS NombreRelacion
         FROM 
-            TCargo c
-        WHERE c.id_cargo = ?
+            TRelacion_Apoderados r
+        WHERE r.id_relacion = ?
     `;
     req.conexion.query(sql, [id], (err, result) => {
         if (err) {

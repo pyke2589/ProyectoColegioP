@@ -2,18 +2,21 @@ const { app, conexion, puerto } = require('./rutas/config/conexion');
 
 const cargo = require('./rutas/cargo');
 const personal = require('./rutas/personal');
-const personaRelacion = require('./rutas/persona_relacion');
+const apoderados = require('./rutas/apoderados');
+const estudiantes = require('./rutas/estudiantes');
 const aulas = require('./rutas/aulas');
-const grados = require('./rutas/grados');
 const asignaturas = require('./rutas/asignaturas');
 const horarios = require('./rutas/horarios');
-const gradosAsignaturas = require('./rutas/grados_asignaturas');
-const inscripciones = require('./rutas/inscripciones');
-const docentesAsignaturas = require('./rutas/docentes_asignaturas');
+const relacionApoderados = require('./rutas/relacion_apoderados');
+const estudiantesApoderados = require('./rutas/estudiantes_apoderados');
 const calificaciones = require('./rutas/calificaciones');
-const asistencias = require('./rutas/asistencias');
 const reportesDisciplinarios = require('./rutas/reportes_disciplinarios');
-const pagos = require('./rutas/pagos');
+const asistenciasPersonal = require('./rutas/asistencias_personal');
+const asignaturasProfesores = require('./rutas/asignaturas_profesores');
+const grados = require('./rutas/grados');
+const estudiantesGrados = require('./rutas/estudiantes_grados');
+const asistencias = require('./rutas/asistencias');
+const gradosAsignaturas = require('./rutas/grados_asignaturas');
 
 // Middleware para pasar la conexión a las rutas
 app.use((req, res, next) => {
@@ -23,18 +26,21 @@ app.use((req, res, next) => {
 
 app.use('/api', cargo);
 app.use('/api', personal);
-app.use('/api', personaRelacion);
+app.use('/api', apoderados);
+app.use('/api', estudiantes);
 app.use('/api', aulas);
-app.use('/api', grados);
 app.use('/api', asignaturas);
 app.use('/api', horarios);
-app.use('/api', gradosAsignaturas);
-app.use('/api', inscripciones);
-app.use('/api', docentesAsignaturas);
+app.use('/api', relacionApoderados);
+app.use('/api', estudiantesApoderados);
 app.use('/api', calificaciones);
-app.use('/api', asistencias);
 app.use('/api', reportesDisciplinarios);
-app.use('/api', pagos);
+app.use('/api', asistenciasPersonal);
+app.use('/api', asignaturasProfesores);
+app.use('/api', grados);
+app.use('/api', estudiantesGrados);
+app.use('/api', asistencias);
+app.use('/api', gradosAsignaturas);
 
 app.listen(puerto, () => {
     console.log(`Servidor levantado en ${puerto}`);

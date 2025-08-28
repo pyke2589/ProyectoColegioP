@@ -26,9 +26,9 @@ router.post('/aulas', (req, res) => {
         let data = {
             id_aula: nuevoId,
             nombre: req.body.nombre,
-            ubicacion: req.body.ubicacion || null,
-            tipo_aula: req.body.tipo_aula,
-            capacidad: req.body.capacidad
+            ubicacion: req.body.ubicacion,
+            capacidad: req.body.capacidad,
+            es_laboratorio: req.body.es_laboratorio || 0
         };
         let sqlInsert = 'INSERT INTO TAulas SET ?';
         req.conexion.query(sqlInsert, data, (err, resul) => {
@@ -46,9 +46,9 @@ router.put('/aulas/:id', (req, res) => {
     let id = req.params.id;
     let data = {
         nombre: req.body.nombre,
-        ubicacion: req.body.ubicacion || null,
-        tipo_aula: req.body.tipo_aula,
-        capacidad: req.body.capacidad
+        ubicacion: req.body.ubicacion,
+        capacidad: req.body.capacidad,
+        es_laboratorio: req.body.es_laboratorio || 0
     };
     let sql = 'UPDATE TAulas SET ? WHERE id_aula = ?';
     req.conexion.query(sql, [data, id], (err, result) => {
@@ -81,8 +81,8 @@ router.get('/aulas/:id', (req, res) => {
             a.id_aula,
             a.nombre AS NombreAula,
             a.ubicacion AS Ubicacion,
-            a.tipo_aula AS TipoAula,
-            a.capacidad AS Capacidad
+            a.capacidad AS Capacidad,
+            CASE a.es_laboratorio WHEN 1 THEN 'Sí' ELSE 'No' END AS EsLaboratorio
         FROM 
             TAulas a
         WHERE a.id_aula = ?

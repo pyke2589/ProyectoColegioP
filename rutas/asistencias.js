@@ -25,9 +25,9 @@ router.post('/asistencias', (req, res) => {
         let nuevoId = result[0].maxId + 1;
         let data = {
             id_asistencia: nuevoId,
-            id_persona_estudiante: req.body.id_persona_estudiante,
+            id_estudiante: req.body.id_estudiante,
             id_asignatura: req.body.id_asignatura,
-            fecha_asistencia: req.body.fecha_asistencia,
+            fecha_asistencia: req.body.fecha_asistencia || new Date(),
             tipo: req.body.tipo,
             observacion: req.body.observacion || null
         };
@@ -46,9 +46,9 @@ router.post('/asistencias', (req, res) => {
 router.put('/asistencias/:id', (req, res) => {
     let id = req.params.id;
     let data = {
-        id_persona_estudiante: req.body.id_persona_estudiante,
+        id_estudiante: req.body.id_estudiante,
         id_asignatura: req.body.id_asignatura,
-        fecha_asistencia: req.body.fecha_asistencia,
+        fecha_asistencia: req.body.fecha_asistencia || new Date(),
         tipo: req.body.tipo,
         observacion: req.body.observacion || null
     };
@@ -84,13 +84,13 @@ router.get('/asistencias/:id', (req, res) => {
             a.fecha_asistencia AS FechaAsistencia,
             a.tipo AS TipoAsistencia,
             COALESCE(a.observacion, '') AS Observacion,
-            CONCAT(p.nombre, ' ', p.apellido1, COALESCE(' ' + p.apellido2, '')) AS NombreEstudiante,
-            p.ci AS CarnetEstudiante,
-            asg.nombre AS NombreAsignatura
+            CONCAT(e.nombre, ' ', e.apellido1, COALESCE(' ' + e.apellido2, '')) AS NombreEstudiante,
+            e.ci AS CarnetEstudiante,
+            s.nombre AS NombreAsignatura
         FROM 
             TAsistencias a
-            INNER JOIN TPersonal p ON a.id_persona_estudiante = p.id_persona
-            INNER JOIN TAsignaturas asg ON a.id_asignatura = asg.id_asignatura
+            INNER JOIN TEstudiantes e ON a.id_estudiante = e.id_estudiante
+            INNER JOIN TAsignaturas s ON a.id_asignatura = s.id_asignatura
         WHERE a.id_asistencia = ?
     `;
     req.conexion.query(sql, [id], (err, result) => {

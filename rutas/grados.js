@@ -84,8 +84,10 @@ router.get('/grados/:id', (req, res) => {
             g.nivel AS Nivel,
             g.grado AS Grado,
             g.paralelo AS Paralelo,
+            g.capacidad AS Capacidad,
             a.nombre AS NombreAula,
-            g.capacidad AS Capacidad
+            a.ubicacion AS UbicacionAula,
+            CASE a.es_laboratorio WHEN 1 THEN 'Sí' ELSE 'No' END AS EsLaboratorio
         FROM 
             TGrados g
             INNER JOIN TAulas a ON g.id_aula = a.id_aula
@@ -97,37 +99,6 @@ router.get('/grados/:id', (req, res) => {
             console.log('Error en la consulta', err);
         } else {
             res.send(result.length > 0 ? result[0] : { mensaje: 'No encontrado' });
-        }
-    });
-});
-
-router.get('/grados/:id/asignaturas', (req, res) => {
-    let id = req.params.id;
-    let sql = `
-        SELECT 
-            g.grado AS Grado,
-            g.paralelo AS Paralelo,
-            g.nivel AS Nivel,
-            a.nombre AS NombreAsignatura,
-            h.turno AS Turno,
-            h.dia_semana AS DiaSemana,
-            h.hora_inicio AS HoraInicio,
-            h.hora_fin AS HoraFin
-        FROM 
-            TGrados g
-            INNER JOIN TGrados_Asignaturas ga ON g.id_grado = ga.id_grado
-            INNER JOIN TAsignaturas a ON ga.id_asignatura = a.id_asignatura
-            INNER JOIN THorarios h ON ga.id_horario = h.id_horario
-        WHERE 
-            g.id_grado = ?
-        ORDER BY a.nombre;
-    `;
-    req.conexion.query(sql, [id], (err, result) => {
-        if (err) {
-            res.json({ mensaje: 'error' });
-            console.log('Error en la consulta', err);
-        } else {
-            res.send(result.length > 0 ? result : { mensaje: 'No se encontraron asignaturas para este grado' });
         }
     });
 });

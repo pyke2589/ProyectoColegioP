@@ -25,7 +25,7 @@ router.post('/calificaciones', (req, res) => {
         let nuevoId = result[0].maxId + 1;
         let data = {
             id_calificacion: nuevoId,
-            id_persona_estudiante: req.body.id_persona_estudiante,
+            id_estudiante: req.body.id_estudiante,
             id_asignatura: req.body.id_asignatura,
             calificacion: req.body.calificacion,
             gestion: req.body.gestion
@@ -45,7 +45,7 @@ router.post('/calificaciones', (req, res) => {
 router.put('/calificaciones/:id', (req, res) => {
     let id = req.params.id;
     let data = {
-        id_persona_estudiante: req.body.id_persona_estudiante,
+        id_estudiante: req.body.id_estudiante,
         id_asignatura: req.body.id_asignatura,
         calificacion: req.body.calificacion,
         gestion: req.body.gestion
@@ -81,12 +81,12 @@ router.get('/calificaciones/:id', (req, res) => {
             c.id_calificacion,
             c.calificacion AS Calificacion,
             c.gestion AS Gestion,
-            CONCAT(p.nombre, ' ', p.apellido1, COALESCE(' ' + p.apellido2, '')) AS NombreEstudiante,
-            p.ci AS CarnetEstudiante,
+            CONCAT(e.nombre, ' ', e.apellido1, COALESCE(' ' + e.apellido2, '')) AS NombreEstudiante,
+            e.ci AS CarnetEstudiante,
             a.nombre AS NombreAsignatura
         FROM 
             TCalificaciones c
-            INNER JOIN TPersonal p ON c.id_persona_estudiante = p.id_persona
+            INNER JOIN TEstudiantes e ON c.id_estudiante = e.id_estudiante
             INNER JOIN TAsignaturas a ON c.id_asignatura = a.id_asignatura
         WHERE c.id_calificacion = ?
     `;
