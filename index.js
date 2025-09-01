@@ -1,4 +1,8 @@
 const { app, conexion, puerto } = require('./rutas/config/conexion');
+const cors = require('cors');
+
+app.use(cors());
+
 
 const cargo = require('./rutas/cargo');
 const personal = require('./rutas/personal');
@@ -18,7 +22,6 @@ const estudiantesGrados = require('./rutas/estudiantes_grados');
 const asistencias = require('./rutas/asistencias');
 const gradosAsignaturas = require('./rutas/grados_asignaturas');
 
-// Middleware para pasar la conexión a las rutas
 app.use((req, res, next) => {
     req.conexion = conexion;
     next();
